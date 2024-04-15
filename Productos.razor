@@ -1,0 +1,99 @@
+﻿@page "/productos"
+@using Actividades.Datos
+@rendermode InteractiveServer
+
+<h3>Gestión de Productos</h3>
+
+<EditForm Model="@_producto" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+        <label for="NumeroInventario" class="form-label">Número de Inventario:</label>
+        <InputNumber id="NumeroInventario" class="form-control" @bind-Value="@_producto.NumeroInventario" />
+        <ValidationMessage For="@(() => _producto.NumeroInventario)" />
+    </div>
+    <div class="mb-3">
+        <label for="Nombre" class="form-label">Nombre del Producto:</label>
+        <InputText id="Nombre" class="form-control" @bind-Value="@_producto.Nombre" />
+        <ValidationMessage For="@(() => _producto.Nombre)" />
+    </div>
+    <div class="mb-3">
+        <label for="Departamento" class="form-label">Departamento:</label>
+        <InputSelect @bind-Value="@_producto.Departamento" class="form-control">
+            <option value="Frutas">Frutas</option>
+            <option value="Verduras">Verduras</option>
+            <option value="Lacteos">Lácteos</option>
+        </InputSelect>
+    </div>
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <button type="button" class="btn btn-secondary" @onclick="Limpiar">Limpiar</button>
+</EditForm>
+
+@if (_productos.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Número de Inventario</th>
+                <th>Nombre</th>
+                <th>Departamento</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var producto in _productos)
+            {
+                <tr>
+                    <td>@producto.NumeroInventario</td>
+                    <td>@producto.Nombre</td>
+                    <td>@producto.Departamento</td>
+                    <td>
+                        <button class="btn btn-info" @onclick="() => CargarParaEditar(producto)">Editar</button>
+                        <button class="btn btn-danger" @onclick="() => Eliminar(producto)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No hay productos registrados.</p>
+}
+
+@code {
+    private List<Producto> _productos = new List<Producto>();
+    private Producto _producto = new Producto();
+
+    private void Guardar()
+    {
+        if (_productos.Any(p => p.NumeroInventario == _producto.NumeroInventario))
+        {
+            // Mostrar mensaje de error de inventario repetido
+            return;
+        }
+
+        _productos.Add(new Producto
+            {
+                NumeroInventario = _producto.NumeroInventario,
+                Nombre = _producto.Nombre,
+                Departamento = _producto.Departamento
+            });
+
+        _producto = new Producto(); // Reset the form
+    }
+
+    private void CargarParaEditar(Producto producto)
+    {
+        _producto = producto;
+    }
+
+    private void Limpiar()
+    {
+        _producto = new Producto();
+    }
+
+    private void Eliminar(Producto producto)
+    {
+        _productos.Remove(producto);
+    }
+}
